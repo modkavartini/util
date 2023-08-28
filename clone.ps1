@@ -9,22 +9,23 @@ function clone {
         [string]
         $path = $dPath
     )
-    if(($repo -eq "help") -or ($repo -notmatch "/")) { help }
-    $API=invoke-WebRequest -uri "https://api.github.com/repos/$repo/releases/latest" -useBasicParsing
-    $branch=($API | convertFrom-Json).target_commitish
-    $zip="https://github.com/$repo/archive/refs/heads/$branch.zip"
-    $outFile="C:\Windows\Temp\clone.zip"
+    if (($repo -eq "help") -or ($repo -notmatch "/")) { help }
+    $API = invoke-WebRequest -uri "https://api.github.com/repos/$repo/releases/latest" -useBasicParsing
+    $branch = ($API | convertFrom-Json).target_commitish
+    $zip = "https://github.com/$repo/archive/refs/heads/$branch.zip"
+    $outFile = "C:\Windows\Temp\clone.zip"
     write-Host "> downloading source for $repo..." -foregroundColor green
-    $WC=new-Object System.Net.WebClient
+    $WC = new-Object System.Net.WebClient
     $WC.downloadFile($zip, $outFile)
-    $outPath="$path\$name"
-    if(test-Path $outPath) {
+    $outPath = "$path\$name"
+    if (test-Path $outPath) {
         write-Host "> existing $name directory found, deleting..." -foregroundColor yellow
         remove-Item "$outPath" -r -force -confirm:$false
     }
     write-Host "> cloning $repo to $outPath..." -foregroundColor green
     expand-Archive $outFile $path -force
-    rename-Item "$outPath-$branch" "$name"
+    $folder = ($repo -replace '.*/','') + "-$branch"
+    rename-Item "$path\$folder" "$name"
     remove-Item $outFile
     write-Host "> done." -foregroundColor green
 }
