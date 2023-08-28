@@ -5,9 +5,11 @@ function clone {
         [string]
         $repo = "help",
         [string]
-        $cloneTo = $dPath
+        $name = ($repo -replace '.*/',''),
+        [string]
+        $path = $dPath
     )
-    if($repo -eq "help") { help }
+    if(($repo -eq "help") -or ($repo -notmatch "/")) { help }
     $API=invoke-WebRequest -uri "https://api.github.com/repos/$repo/releases/latest" -useBasicParsing
     $branch=($API | convertFrom-Json).target_commitish
     $zip="https://github.com/$repo/archive/refs/heads/$branch.zip"
@@ -15,14 +17,13 @@ function clone {
     write-Host "> downloading source for $repo..." -foregroundColor green
     $WC=new-Object System.Net.WebClient
     $WC.downloadFile($zip, $outFile)
-    $name=$repo -replace '.*/',''
-    $outPath="$cloneTo\$name"
+    $outPath="$path\$name"
     if(test-Path $outPath) {
         write-Host "> existing $name directory found, deleting..." -foregroundColor yellow
         remove-Item "$outPath" -r -force -confirm:$false
     }
     write-Host "> cloning $repo to $outPath..." -foregroundColor green
-    expand-Archive $outFile $cloneTo -force
+    expand-Archive $outFile $path -force
     rename-Item "$outPath-$branch" "$name"
     remove-Item $outFile
     write-Host "> done." -foregroundColor green
@@ -32,8 +33,10 @@ function help {
     write-Host "required parameter:"
     write-Host "-repo" -foregroundColor red -noNewline
     write-Host " author/repository"
-    write-Host "optional parameter:"
-    write-Host "-cloneTo" -foregroundColor yellow -noNewline
+    write-Host "optional parameters:"
+    write-Host "-name" -foregroundColor yellow -noNewline
+    write-Host " the name of folder to clone to. this is the name of the repository by default."
+    write-Host "-path" -foregroundColor yellow -noNewline
     write-Host " the path to clone to in quotes. this is" -noNewline
     write-Host " $dPath" -foregroundColor green -noNewline
     write-Host " by default."
