@@ -30,7 +30,6 @@ function clone {
     rename-Item "$path\$folder" "$name"
     remove-Item $outFile
     write-Host "> done." -foregroundColor green
-    start-Process 
 }
 
 function help {
