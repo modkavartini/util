@@ -18,6 +18,7 @@ function clone {
     $WC = new-Object System.Net.WebClient
     $WC.downloadFile($zip, $outFile)
     $outPath = "$path\$name"
+    write-Host "> killing rainmeter.exe..." -foregroundColor yellow
     stop-Process -name "Rainmeter" -eA 0
     if (test-Path $outPath) {
         write-Host "> existing $name directory found, deleting..." -foregroundColor yellow
@@ -29,6 +30,7 @@ function clone {
     rename-Item "$path\$folder" "$name"
     remove-Item $outFile
     write-Host "> done." -foregroundColor green
+    start-Process 
 }
 
 function help {
