@@ -18,8 +18,10 @@ function clone {
     $WC = new-Object System.Net.WebClient
     $WC.downloadFile($zip, $outFile)
     $outPath = "$path\$name"
+    if (get-Process "Rainmeter" -eA 0) { 
     write-Host "> killing rainmeter.exe..." -foregroundColor yellow
     stop-Process -name "Rainmeter" -eA 0
+    }
     if (test-Path $outPath) {
         write-Host "> existing $name directory found, deleting..." -foregroundColor yellow
         remove-Item "$outPath" -r -force -confirm:$false
