@@ -18,12 +18,8 @@ function clone {
     write-Host "> repo $status!" -foregroundColor $sColor
     if ($status -ne "found") { break }
     if ($branch -eq 0) {
-        write-Host "> attempting to get branch name from the latest release..." -foregroundColor green
-        $branch = try { ((invoke-WebRequest -uri "https://api.github.com/repos/$repo/releases/latest" -useb) | convertFrom-Json).target_commitish } catch { "noreleaseskull" }
-        if ($branch -eq "noreleaseskull") {
-            write-Host "> no releases found :skull:`n> using main instead..." -foregroundColor yellow
-            $branch = "main"
-        }
+        $branch = ((invoke-WebRequest -uri "https://api.github.com/repos/$repo" -useb) | convertFrom-Json).default_branch
+        write-Host "> found default branch: $branch!" -foregroundColor green
     }
     $zip = "https://github.com/$repo/archive/refs/heads/$branch.zip"
     $outFile = "C:\Windows\Temp\clone.zip"
