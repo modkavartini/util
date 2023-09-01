@@ -18,8 +18,10 @@ function clone {
     $WC = new-Object System.Net.WebClient
     $WC.downloadFile($zip, $outFile)
     $outPath = "$path\$name"
-    if (get-Process "Rainmeter" -eA 0) { 
-    write-Host "> killing rainmeter.exe..." -foregroundColor yellow
+    $rm = get-Process "Rainmeter" -eA 0
+    $rmPath = $rm.path
+    if ($rm) { 
+    write-Host "> killing Rainmeter.exe..." -foregroundColor yellow
     stop-Process -name "Rainmeter" -eA 0
     }
     if (test-Path $outPath) {
@@ -31,6 +33,10 @@ function clone {
     $folder = ($repo -replace '.*/','') + "-$branch"
     rename-Item "$path\$folder" "$name"
     remove-Item $outFile
+    if ($rm) { 
+        write-Host "> restarting Rainmeter.exe..." -foregroundColor green
+        start-Process "$rmPath"
+    }
     write-Host "> done." -foregroundColor green
 }
 
