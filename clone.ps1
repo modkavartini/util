@@ -19,7 +19,7 @@ function clone {
     if ($status -ne "found") { break }
     if ($branch -eq 0) {
         $branch = ((invoke-WebRequest -uri "https://api.github.com/repos/$repo" -useb) | convertFrom-Json).default_branch
-        write-Host "> found default branch: $branch!" -foregroundColor green
+        write-Host "> found default branch: $branch" -foregroundColor green
     }
     $zip = "https://github.com/$repo/archive/refs/heads/$branch.zip"
     $outFile = "C:\Windows\Temp\clone.zip"
@@ -32,6 +32,12 @@ function clone {
         $path = $env:userProfile
         $rm = $false
     }
+    $drive = $path -replace ':\\.*',''
+    if (!(test-Path ($drive + ":\"))) {
+        write-Host "> the specified drive $drive does not exist!" -foregroundColor red
+        break
+     }
+    if (!(test-Path $path)) { write-Host "> the specified folder at $path was not found!`n> creating it..." -foregroundColor yellow }
     if ($rm) { 
     write-Host "> killing Rainmeter.exe..." -foregroundColor yellow
     stop-Process -name "Rainmeter" -eA 0
