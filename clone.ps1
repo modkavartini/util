@@ -65,9 +65,7 @@ function help {
     write-Host " author/repository"
     write-Host "`noptional parameters:"
     write-Host "-branch" -foregroundColor yellow -noNewline
-    write-Host " the branch to clone. this is automatically fetched from the latest release, in the absence of which," -noNewLine
-    write-Host "`n main" -foregroundColor green -noNewline
-    Write-Host " is used."
+    write-Host " the branch to clone. this is automatically fetched by default."
     write-Host "-name" -foregroundColor yellow -noNewline
     write-Host " the name of folder to clone to. this is the name of the repository by default."
     write-Host "-path" -foregroundColor yellow -noNewline
