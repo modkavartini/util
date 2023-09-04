@@ -44,7 +44,14 @@ function clone {
     }
     $outPath = "$path\$name"
     if (test-Path $outPath) {
-        write-Host "> existing $name directory found, deleting..." -foregroundColor yellow
+        write-Host "> existing $name directory found!`n> checking for active processes from directory..." -foregroundColor yellow
+        get-ChildItem $outPath -filter *.exe -r | forEach-Object {
+            if (get-Process $_.baseName -eA 0) {
+                write-Host "> killing $($_.baseName).exe..." -foregroundColor red
+                stop-Process -name $_.baseName -eA 0
+            }
+        }
+        write-Host "> deleting existing $name directory..." -foregroundColor yellow
         remove-Item "$outPath" -r -force -confirm:$false
     }
     write-Host "> cloning $repo to $outPath..." -foregroundColor green
