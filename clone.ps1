@@ -38,7 +38,8 @@ function clone {
         break
      }
     if (!(test-Path $path)) { write-Host "> the specified folder at $path was not found!`n> creating it..." -foregroundColor yellow }
-    if ($rm) { 
+    if ($rm) {
+    "$PSScriptRoot"
     write-Host "> killing Rainmeter.exe..." -foregroundColor yellow
     stop-Process -name "Rainmeter" -eA 0
     }
