@@ -9,7 +9,6 @@ clone github repos to your rm skins folder.
 do
 ```
 iwr -useb "https://raw.githubusercontent.com/modkavartini/util/main/clone.ps1" | iex
-clone
 ```
 to learn it's functions.
 
