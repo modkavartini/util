@@ -91,3 +91,6 @@ function help {
     write-Host " -branch main -name cat_bussin -path `"D:\Rainmeter\Skins`"" -foregroundColor yellow
     break
 }
+
+# print help on iex :3
+clone
