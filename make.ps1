@@ -28,6 +28,7 @@ function make {
     
     nircmd.exe win activate ititle "$title"
     nircmd.exe win max ititle "$title"
+    nircmd.exe win settopmost ititle "$title" 1
     waitFor 1
 
     $i = $start
@@ -82,6 +83,8 @@ function make {
         write-Host "completed c$($i)!`n" -foregroundColor green
         $i++
     }
+    waitFor 1
+    nircmd.exe win settopmost ititle "$title" 0
     nircmd.exe win min ititle "$title"
     nircmd.exe infobox "tasks completed!" "done!"
     waitFor 1
@@ -119,9 +122,13 @@ function grab {
         waitFor 1
         $result += get-Clipboard
         $result += "|"
-        if ($j -lt ($c-1)) { nextGrab }
+        if ($j -lt ($c-1)) {
+            nircmd.exe movecursor 0 -1.5
+            nextGrab
+        }
     }
     $result = $result -replace "\|$",""
+    set-Clipboard "$result"
     nircmd.exe win min ititle "Profile"
     return $result
 }
