@@ -113,11 +113,13 @@ function grab {
     waitFor 1
     sendKey 0x24
     waitFor 2
-    nircmd.exe setcursor 320 945
+    nircmd.exe setcursor 320 958
+    #320 945
 
     for ($j = 0; $j -lt $c; $j++) {
         nircmd.exe sendmouse left dblclick
-        sendKey shift+0x23
+        nircmd.exe sendmouse left dblclick
+        #sendKey shift+0x23
         sendKey ctrl+c
         waitFor 1
         $result += get-Clipboard
