@@ -78,6 +78,7 @@ function make {
         #export as png
         waitFor 1
         set-Clipboard "c$i"
+        if ($i -eq 1) { waitFor 3 }
         sendKey ctrl+v
         sendKey enter
         write-Host "completed c$($i)!`n" -foregroundColor green
