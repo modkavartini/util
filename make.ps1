@@ -7,16 +7,37 @@ function make {
         [int32]
         $start = 1,
         [string]
-        $title = "template.psd"
+        $title = "template.psd",
+        [switch]
+        $clear,
+        [string]
+        $path = "$env:userProfile\Documents\psd"
     )
 
     if (($text -eq "null") -or (!(get-Process "Photoshop" -eA 0))) {
         write-Error "requirements were not met! text parameter was not defined and/or photoshop is not running."
         break
     }
+
     "`n"
     $preview = $text -replace "\|","`n`n"
     write-Host "$preview" -foregroundColor yellow
+    "`n"
+
+    if ($clear) {
+        if (test-Path $path) {
+            write-Host "clearing output folder..." -foregroundColor red
+            get-ChildItem $path -filter c*.png | forEach-Object { $_.delete() }
+        }
+        else {
+            write-Error "defined output path was not found!"
+            break
+        }
+    }
+
+    else {
+        get-ChildItem $path -filter c*.png | forEach-Object { $start++ }
+    }
 
     write-Host "`npress any key to start...`n" -foregroundColor red
     $null = $host.UI.rawUI.readKey('noEcho,includeKeyDown')
@@ -26,7 +47,7 @@ function make {
         start-Sleep 1
     }
     
-    nircmd.exe win activate ititle "$title"
+    #nircmd.exe win activate ititle "$title"
     nircmd.exe win max ititle "$title"
     nircmd.exe win settopmost ititle "$title" 1
     waitFor 1
@@ -69,7 +90,7 @@ function make {
         waitFor 1
         sendKey esc
         sendKey esc
-        sendKey ctrl+a
+        if ($i -eq 1) { sendKey ctrl+a }
         sendKey alt+shift+ctrl+q
         #vertical align
         sendKey alt+shift+ctrl+d
@@ -79,6 +100,7 @@ function make {
         waitFor 1
         set-Clipboard "c$i"
         if ($i -eq 1) { waitFor 3 }
+        else { waitFor 3 }
         sendKey ctrl+v
         sendKey enter
         write-Host "completed c$($i)!`n" -foregroundColor green
@@ -109,7 +131,7 @@ function grab {
     )
     $result = ""
 
-    nircmd.exe win activate ititle "Profile"
+    #nircmd.exe win activate ititle "Profile"
     nircmd.exe win max ititle "Profile"
     waitFor 1
     sendKey 0x24
