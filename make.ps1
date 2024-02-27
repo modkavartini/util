@@ -125,18 +125,19 @@ function waitFor($t) {
 function grab {
     param (
         [int32]
-        $c = 0,
+        $c = 1,
         [switch]
-        $alive
+        $a
     )
     $result = ""
 
     nircmd.exe win max ititle "Profile"
     waitFor 1
     sendKey 0x24
+    waitFor 2
     sendKey 0x11+0x74
-    waitFor 12
-    if (!($alive)) { attemptIn }
+    waitFor 7
+    if (!($a)) { attemptIn }
     nircmd.exe setcursor 320 958
 
     for ($j = 0; $j -lt $c; $j++) {
@@ -153,6 +154,7 @@ function grab {
             nextGrab
         }
     }
+    sendKey 0x24
     $result = $result -replace "\|$",""
     set-Clipboard "$result"
     nircmd.exe win min ititle "Profile"
@@ -242,4 +244,5 @@ function p {
         waitFor 3
     }
     nircmd.exe win min ititle "Instagram"
+    get-ChildItem $path -filter c*.png | forEach-Object { $_.delete() }
 }
