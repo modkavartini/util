@@ -126,30 +126,34 @@ function grab {
     param (
         [int32]
         $c = 1,
+        [string]
+        $skip,
         [switch]
         $a
     )
     $result = ""
 
-    nircmd.exe win max ititle "Profile"
+    nircmd.exe win max ititle "ssout"
     waitFor 1
     sendKey 0x24
     waitFor 2
     sendKey 0x11+0x74
     waitFor 7
-    if (!($a)) { attemptIn }
+    if ($a) { attemptIn }
     nircmd.exe setcursor 320 958
 
-    for ($j = 0; $j -lt $c; $j++) {
+    for ($j = 1; $j -le $c; $j++) {
         waitFor 1
-        nircmd.exe sendmouse left dblclick
-        nircmd.exe sendmouse left dblclick
-        #sendKey shift+0x23
-        sendKey ctrl+c
-        waitFor 1
-        $result += get-Clipboard
-        $result += "|"
-        if ($j -lt ($c-1)) {
+        if ($skip -notmatch $j) {
+            nircmd.exe sendmouse left dblclick
+            nircmd.exe sendmouse left dblclick
+            #sendKey shift+0x23
+            sendKey ctrl+c
+            waitFor 1
+            $result += get-Clipboard
+            $result += "|"
+        }
+        if ($j -lt $c) {
             nircmd.exe movecursor 0 -1.5
             nextGrab
         }
@@ -157,7 +161,7 @@ function grab {
     sendKey 0x24
     $result = $result -replace "\|$",""
     set-Clipboard "$result"
-    nircmd.exe win min ititle "Profile"
+    nircmd.exe win min ititle "ssout"
     return $result
 }
 
@@ -205,6 +209,7 @@ function attemptIn {
     sendKey 0x41
     sendKey 0x4D
     sendKey enter
+    waitFor 5
 }
 
 function goAndClick {
