@@ -248,6 +248,8 @@ function p {
         write-Host "p'd c$($l)!`n" -foregroundColor green
         waitFor 3
     }
+    sendKey 0x11+0x74
+    waitFor 2
     nircmd.exe win min ititle "Instagram"
     get-ChildItem $path -filter c*.png | forEach-Object { $_.delete() }
 }
