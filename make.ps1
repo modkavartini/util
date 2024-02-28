@@ -22,6 +22,8 @@ function make {
     }
 
     "`n"
+    $text = $text -replace "`u{2764}","`u{1F5A4}"
+    $text = $text -replace "`u{1FA77}","`u{1F497}"
     $preview = $text -replace "\|","`n`n"
     write-Host "$preview" -foregroundColor yellow
     "`n"
@@ -51,7 +53,6 @@ function make {
     waitFor 1
 
     $i = $start
-    $text = $text -replace "`u{2764}","`u{1F5A4}"
     $text -split "\|" | forEach-Object {
         $current = $_
 
@@ -245,7 +246,7 @@ function p {
         goAndClick -x 1470 -y 245
         waitFor 5
         goAndClick -x 1865 -y 145
-        write-Host "p'd c$($l)!`n" -foregroundColor green
+        write-Host "`np'd c$($l)!`n" -foregroundColor green
         waitFor 3
     }
     sendKey 0x11+0x74
