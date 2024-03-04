@@ -1,4 +1,4 @@
-$path = "$env:userProfile\Documents\psd"
+$path = "$env:userProfile\Documents\Adobe\psd"
 
 function make {
     param (
@@ -22,13 +22,13 @@ function make {
     }
 
     "`n"
-    $text = $text -replace "`u{2764}","`u{1F5A4}"
+    #$text = $text -replace "`u{2764}","`u{1F5A4}"
     $text = $text -replace "`u{1FA77}","`u{1F497}"
     $preview = $text -replace "\|","`n`n"
     write-Host "$preview" -foregroundColor yellow
     "`n"
 
-    if (!($continue)) {
+    if (!($continue) -and ($start -eq 1)) {
         if (test-Path $path) {
             write-Host "clearing output folder...`n" -foregroundColor red
             get-ChildItem $path -filter c*.png | forEach-Object { $_.delete() }
@@ -47,7 +47,6 @@ function make {
         start-Sleep 1
     }
     
-    #nircmd.exe win activate ititle "$title"
     nircmd.exe win max ititle "$title"
     nircmd.exe win settopmost ititle "$title" 1
     waitFor 1
@@ -83,6 +82,8 @@ function make {
 
         write-Host "starting c$($i):" -foregroundColor yellow
         write-Host "$output`n" -foregroundColor blue
+        if (!(get-Process "Photoshop" -eA 0)) { break }
+        goAndClick -x 960 -y 540
         sendKey alt+0xBE
         sendKey ctrl+enter
         sendKey ctrl+v
@@ -132,6 +133,7 @@ function grab {
         [switch]
         $a
     )
+
     $result = ""
 
     nircmd.exe win max ititle "ssout"
@@ -141,36 +143,26 @@ function grab {
     sendKey 0x11+0x74
     waitFor 7
     if ($a) { attemptIn }
-    nircmd.exe setcursor 320 958
 
-    for ($j = 1; $j -le $c; $j++) {
-        waitFor 1
-        if ($skip -notmatch $j) {
-            nircmd.exe sendmouse left dblclick
-            nircmd.exe sendmouse left dblclick
-            #sendKey shift+0x23
-            sendKey ctrl+c
-            waitFor 1
-            $result += get-Clipboard
-            $result += "|"
-        }
-        if ($j -lt $c) {
-            nircmd.exe movecursor 0 -1.5
-            nextGrab
-        }
+    sendKey ctrl+a
+    waitFor 2
+    sendKey ctrl+c
+    waitFor 2
+    get-Clipboard | select-String "-.+\d\d:\d\d:\d\d$" -context 1 | forEach-Object {
+        $list += $_.context.postContext 
     }
-    sendKey 0x24
+    $j = 1
+    $list -split "`n" | forEach-Object {
+        if (($j -le $c) -and ($skip -notmatch $j)) {
+            $result += $_ + "|"
+        }
+        $j++
+    }
+    waitFor 1
     $result = $result -replace "\|$",""
     set-Clipboard "$result"
     nircmd.exe win min ititle "ssout"
     return $result
-}
-
-function nextGrab {
-    for ($k = 0; $k -lt 3; $k++) {
-        sendKey 0x28
-        waitFor 0.1
-    }
 }
 
 function attemptIn {
