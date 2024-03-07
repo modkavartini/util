@@ -22,8 +22,7 @@ function make {
     }
 
     "`n"
-    #$text = $text -replace "`u{2764}","`u{1F5A4}"
-    $text = $text -replace "`u{1FA77}","`u{1F497}"
+    $text = replaceUnicodes($text)
     $preview = $text -replace "\|","`n`n"
     write-Host "$preview" -foregroundColor yellow
     "`n"
@@ -38,9 +37,6 @@ function make {
     else {
         get-ChildItem $path -filter c*.png | forEach-Object { $start++ }
     }
-
-    #write-Host "`npress any key to start...`n" -foregroundColor red
-    #$null = $host.UI.rawUI.readKey('noEcho,includeKeyDown')
 
     for ($t = 5; $t -gt 1; $t--) {
         write-Progress -activity " starting" -status "in:" -secondsRemaining $t
@@ -83,7 +79,7 @@ function make {
         write-Host "starting c$($i):" -foregroundColor yellow
         write-Host "$output`n" -foregroundColor blue
         if (!(get-Process "Photoshop" -eA 0)) { break }
-        goAndClick -x 960 -y 540
+        goAndClick 960 540
         sendKey alt+0xBE
         sendKey ctrl+enter
         sendKey ctrl+v
@@ -124,6 +120,12 @@ function waitFor($t) {
     start-Sleep $t
 }
 
+function goAndClick($x, $y) {
+    nircmd.exe setcursor $x $y
+    nircmd.exe sendmouse left click
+    waitFor 2
+}
+
 function grab {
     param (
         [int32]
@@ -148,6 +150,7 @@ function grab {
     waitFor 2
     sendKey ctrl+c
     waitFor 2
+    goAndClick 950 790
     get-Clipboard | select-String "-.+\d\d:\d\d:\d\d$" -context 1 | forEach-Object {
         $list += $_.context.postContext 
     }
@@ -160,13 +163,20 @@ function grab {
     }
     waitFor 1
     $result = $result -replace "\|$",""
+    $result = replaceUnicodes($result)
     set-Clipboard "$result"
     nircmd.exe win min ititle "ssout"
     return $result
 }
 
+function replaceUnicodes($uni) {
+    $uni = $uni -replace "`u{2764}","`u{1F5A4}"
+    $uni = $uni -replace "`u{1FA77}","`u{1F497}"
+    return $uni
+}
+
 function attemptIn {
-    goAndClick -x 960 -y 295
+    goAndClick 960 295
     waitFor 1
     sendKey 0x43
     sendKey 0x4F
@@ -205,18 +215,6 @@ function attemptIn {
     waitFor 5
 }
 
-function goAndClick {
-    param (
-        [int32]
-        $x,
-        [int32]
-        $y
-    )
-    nircmd.exe setcursor $x $y
-    nircmd.exe sendmouse left click
-    waitFor 2
-}
-
 function p {
     param (
         [int32]
@@ -226,18 +224,18 @@ function p {
     nircmd.exe win max ititle "Instagram"
     waitFor 2
     for ($l = 1; $l -le $c; $l++) {
-        goAndClick -x 170 -y 690
-        goAndClick -x 960 -y 700
+        goAndClick 170 690
+        goAndClick 960 700
         waitFor 1
         set-Clipboard "$path\c$l.png"
         sendKey ctrl+v
         sendKey enter
         waitFor 2
-        goAndClick -x 1260 -y 245
-        goAndClick -x 1470 -y 245
-        goAndClick -x 1470 -y 245
+        goAndClick 1260 245
+        goAndClick 1470 245
+        goAndClick 1470 245
         waitFor 5
-        goAndClick -x 1865 -y 145
+        goAndClick 1865 145
         write-Host "`np'd c$($l)!`n" -foregroundColor green
         waitFor 3
     }
