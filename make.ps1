@@ -133,7 +133,9 @@ function grab {
         [string]
         $skip,
         [switch]
-        $a
+        $a,
+        [switch]
+        $nr
     )
 
     $result = ""
@@ -142,8 +144,10 @@ function grab {
     waitFor 1
     sendKey 0x24
     waitFor 2
-    sendKey 0x11+0x74
-    waitFor 7
+    if (!($nr)) {
+        sendKey 0x11+0x74
+        waitFor 7
+    }
     if ($a) { attemptIn }
 
     sendKey ctrl+a
@@ -234,7 +238,7 @@ function p {
         goAndClick 1260 245
         goAndClick 1470 245
         goAndClick 1470 245
-        waitFor 5
+        waitFor 7
         goAndClick 1865 145
         write-Host "`np'd c$($l)!`n" -foregroundColor green
         waitFor 3
