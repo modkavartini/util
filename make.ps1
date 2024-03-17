@@ -123,7 +123,7 @@ function waitFor($t) {
 function goAndClick($x, $y) {
     nircmd.exe setcursor $x $y
     nircmd.exe sendmouse left click
-    waitFor 2
+    waitFor 3
 }
 
 function grab {
@@ -133,7 +133,7 @@ function grab {
         [string]
         $skip,
         [switch]
-        $a,
+        $na,
         [switch]
         $nr
     )
@@ -148,7 +148,7 @@ function grab {
         sendKey 0x11+0x74
         waitFor 7
     }
-    if ($a) { attemptIn }
+    if (!($na)) { attemptIn }
 
     sendKey ctrl+a
     waitFor 2
