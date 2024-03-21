@@ -12,11 +12,13 @@ function make {
         $title = "template.psd",
         [switch]
         $continue,
+        [switch]
+        $im,
         [string]
         $path = $path
     )
 
-    if (($text -eq "null") -or (!(get-Process "Photoshop" -eA 0))) {
+    if ((($text -eq "null") -or (!(get-Process "Photoshop" -eA 0))) -and (!($im))) {
         write-Error "requirements were not met! text parameter was not defined and/or photoshop is not running."
         break
     }
@@ -38,14 +40,18 @@ function make {
         get-ChildItem $path -filter c*.png | forEach-Object { $start++ }
     }
 
-    for ($t = 5; $t -gt 1; $t--) {
-        write-Progress -activity " starting" -status "in:" -secondsRemaining $t
-        start-Sleep 1
+    if (!($im)) {
+        for ($t = 5; $t -gt 1; $t--) {
+            write-Progress -activity " starting" -status "in:" -secondsRemaining $t
+            start-Sleep 1
+        }
     }
     
-    nircmd.exe win max ititle "$title"
-    nircmd.exe win settopmost ititle "$title" 1
-    waitFor 1
+    if (!($im)) {
+        nircmd.exe win max ititle "$title"
+        nircmd.exe win settopmost ititle "$title" 1
+        waitFor 1
+    }
 
     $i = $start
     $text -split "\|" | forEach-Object {
@@ -74,40 +80,47 @@ function make {
         }
         $output += $line
         $output = $output
-        set-Clipboard "$output"
 
-        write-Host "starting c$($i):" -foregroundColor yellow
-        write-Host "$output`n" -foregroundColor blue
-        if (!(get-Process "Photoshop" -eA 0)) { break }
-        goAndClick 960 540
-        sendKey alt+0xBE
-        sendKey ctrl+enter
-        sendKey ctrl+v
-        waitFor 1
-        sendKey esc
-        sendKey esc
-        if ($i -eq 1) { sendKey ctrl+a }
-        sendKey alt+shift+ctrl+q
-        #vertical align
-        sendKey alt+shift+ctrl+d
-        #horizontal align
-        sendKey alt+shift+ctrl+g
-        #export as png
-        waitFor 1
-        set-Clipboard "c$i"
-        if ($i -eq 1) { waitFor 3 }
-        else { waitFor 3 }
-        sendKey ctrl+v
-        sendKey enter
+        if (!($im)) {
+            set-Clipboard "$output"
+            write-Host "starting c$($i):" -foregroundColor yellow
+            write-Host "$output`n" -foregroundColor blue
+            if (!(get-Process "Photoshop" -eA 0)) { break }
+            goAndClick 960 540
+            sendKey alt+0xBE
+            sendKey ctrl+enter
+            sendKey ctrl+v
+            waitFor 1
+            sendKey esc
+            sendKey esc
+            if ($i -eq 1) { sendKey ctrl+a }
+            sendKey alt+shift+ctrl+q
+            #vertical align
+            sendKey alt+shift+ctrl+d
+            #horizontal align
+            sendKey alt+shift+ctrl+g
+            #export as png
+            waitFor 1
+            set-Clipboard "c$i"
+            if ($i -eq 1) { waitFor 3 }
+            else { waitFor 3 }
+            sendKey ctrl+v
+            sendKey enter
+        }
+
+        else {
+            convert "$path\template.png" -gravity center -font "$path\font.otf" -fill "#e1e7fa" -pointsize 37 -annotate 0 "$output" "$path\c$($start).png"
+        }
+
         write-Host "completed c$($i)!`n" -foregroundColor green
         $i++
     }
+    if (!($im)) {
+        waitFor 1
+        nircmd.exe win settopmost ititle "$title" 0
+        nircmd.exe win min ititle "$title"
+    }
     waitFor 1
-    nircmd.exe win settopmost ititle "$title" 0
-    nircmd.exe win min ititle "$title"
-    #nircmd.exe infobox "tasks completed!" "done!"
-    waitFor 1
-    #nircmd.exe win settopmost title "done!" 1
     write-Host "completed all $($i-1) tasks!" -foregroundColor red
 }
 
