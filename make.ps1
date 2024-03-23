@@ -163,10 +163,11 @@ function grab {
     }
     if (!($na)) { attemptIn }
 
+    waitFor 5
     sendKey ctrl+a
-    waitFor 2
+    waitFor 5
     sendKey ctrl+c
-    waitFor 2
+    waitFor 5
     goAndClick 950 790
     get-Clipboard | select-String "-.+\d\d:\d\d:\d\d$" -context 1 | forEach-Object {
         $list += $_.context.postContext 
