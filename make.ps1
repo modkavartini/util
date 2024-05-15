@@ -164,11 +164,13 @@ function grab {
     if (!($na)) { attemptIn }
 
     waitFor 5
+    goAndClick 950 220
+    waitFor 2
     sendKey ctrl+a
     waitFor 5
     sendKey ctrl+c
     waitFor 5
-    goAndClick 950 790
+    goAndClick 950 220
     get-Clipboard | select-String "-.+\d\d:\d\d:\d\d$" -context 1 | forEach-Object {
         $list += $_.context.postContext 
     }
@@ -236,11 +238,17 @@ function attemptIn {
 function p {
     param (
         [int32]
-        $c = 1
+        $c = 1,
+        [switch]
+        $all
     )
     waitFor 2
     nircmd.exe win max ititle "Instagram"
     waitFor 2
+    if ($all) {
+        $c = 0
+        get-ChildItem $path -filter c*.png | forEach-Object { $c++ }
+    }
     for ($l = 1; $l -le $c; $l++) {
         goAndClick 170 690
         goAndClick 960 700
@@ -261,4 +269,24 @@ function p {
     waitFor 2
     nircmd.exe win min ititle "Instagram"
     get-ChildItem $path -filter c*.png | forEach-Object { $_.delete() }
+}
+
+function clear-Clip {
+    sendKey lwin+d
+    sendKey lwin+v
+    waitFor 2
+    goAndClick 1860 710
+    sendKey esc
+}
+
+function gmpq($c) {
+    make(grab -c $c -nr -na)
+    p -all
+    clear-Clip
+}
+
+function gmp($c) {
+    make(grab -c $c)
+    p -all
+    clear-Clip
 }
