@@ -155,6 +155,10 @@ function grab {
 
     nircmd.exe win max ititle "ssout"
     waitFor 1
+    if ((get-Process | select-Object  mainWindowTitle | select-String "ssout") -notmatch "ssout") {
+        write-Error "tab/process not found!"
+        break
+    }
     sendKey 0x24
     waitFor 2
     if (!($nr)) {
@@ -172,7 +176,8 @@ function grab {
     waitFor 5
     goAndClick 950 220
     get-Clipboard | select-String "-.+\d\d:\d\d:\d\d$" -context 1 | forEach-Object {
-        $list += $_.context.postContext 
+        $add = $_.context.postContext 
+        if ($add -notin $list) { $list += $_.context.postContext }
     }
     $j = 1
     $list -split "`n" | forEach-Object {
@@ -245,11 +250,17 @@ function p {
     waitFor 2
     nircmd.exe win max ititle "Instagram"
     waitFor 2
+    goAndClick 175 750
+    waitFor 4
+    if ((get-Process | select-Object  mainWindowTitle | select-String "Instagram") -notmatch ".+c.+k.c.+") {
+        write-Error "tab/process/account not found!"
+        break
+    }
     if ($all) {
         $c = 0
         get-ChildItem $path -filter c*.png | forEach-Object { $c++ }
     }
-    for ($l = 1; $l -le $c; $l++) {
+    for ($l = $c; $l -gt 0; $l--) {
         goAndClick 170 690
         goAndClick 960 700
         waitFor 1
@@ -262,7 +273,7 @@ function p {
         goAndClick 1470 245
         waitFor 7
         goAndClick 1865 145
-        write-Host "`np'd c$($l)!`n" -foregroundColor green
+        write-Host "`nposted c$($l)!" -foregroundColor green
         waitFor 3
     }
     sendKey 0x11+0x74
@@ -279,14 +290,27 @@ function clear-Clip {
     sendKey esc
 }
 
+#macros
+
 function gmpq($c) {
     make(grab -c $c -nr -na)
     p -all
     clear-Clip
 }
 
+function gmpqim($c) {
+    make(grab -c $c -nr -na) -im
+    p -all
+    clear-Clip
+}
+
 function gmp($c) {
     make(grab -c $c)
+    p -all
+    clear-Clip
+}
+function gmpim($c) {
+    make(grab -c $c) -im
     p -all
     clear-Clip
 }
