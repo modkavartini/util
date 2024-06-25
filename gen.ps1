@@ -1,6 +1,6 @@
 $path = "$env:userProfile\Documents\Adobe\psd"
 
-function make {
+function gen {
     param (
         [string]
         $text = "null",
@@ -292,25 +292,42 @@ function clear-Clip {
 
 #macros
 
-function gmpq($c) {
-    make(grab -c $c -nr -na)
+function ggpq($c) {
+    gen(grab -c $c -nr -na)
     p -all
     clear-Clip
 }
 
-function gmpqim($c) {
-    make(grab -c $c -nr -na) -im
+function ggpqim($c) {
+    gen(grab -c $c -nr -na) -im
     p -all
     clear-Clip
 }
 
-function gmp($c) {
-    make(grab -c $c)
+function ggp($c) {
+    gen(grab -c $c)
     p -all
     clear-Clip
 }
-function gmpim($c) {
-    make(grab -c $c) -im
+
+function ggpim($c) {
+    gen(grab -c $c) -im
+    p -all
+    clear-Clip
+}
+
+function ggpio($n) {
+    $l = $n[-1]
+    for ($i = 1; $i -le $l; $i++) {
+        if ("$n" -notmatch "$i") {
+            $s += "$i,"
+        }
+    }
+    $s = $s -replace ",$",""
+    $c = $l
+    write-Host "excluded $s." -foregroundColor blue
+    
+    gen(grab -c $c -skip "$s")
     p -all
     clear-Clip
 }
