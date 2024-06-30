@@ -225,40 +225,13 @@ function replaceUnicodes($uni) {
 
 function attemptIn {
     tabChoose 2
-    waitFor 1
-    sendKey 0x43
-    sendKey 0x4F
-    sendKey 0x4E
-    sendKey 0x46
-    sendKey 0x45
-    sendKey 0x53
-    sendKey 0x53
-    sendKey 0x49
-    sendKey 0x4F
-    sendKey 0x4E
-    sendKey 0x53
-    sendKey 0x4F
-    sendKey 0x46
-    sendKey 0x43
-    sendKey 0x45
-    sendKey 0x4B
+    set-Clipboard (get-Content "$path\idp.env" -totalCount 1)
+    sendKey ctrl+v
     waitFor 1
     sendKey enter
     waitFor 1
-    sendKey 0x41
-    sendKey 0x41
-    sendKey 0x52
-    sendKey 0x59
-    sendKey 0x41
-    sendKey 0x4E
-    sendKey shift+0x33
-    sendKey 0x41
-    sendKey 0x42
-    sendKey 0x48
-    sendKey 0x49
-    sendKey 0x52
-    sendKey 0x41
-    sendKey 0x4D
+    set-Clipboard (get-Content "$path\idp.env" -tail 1)
+    sendKey ctrl+v
     sendKey enter
     waitFor 5
 }
