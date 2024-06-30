@@ -163,8 +163,6 @@ function grab {
         [string]
         $skip,
         [switch]
-        $na,
-        [switch]
         $nr
     )
 
@@ -183,7 +181,7 @@ function grab {
         sendKey 0x11+0x74
         waitFor 7
     }
-    if (!($na)) { attemptIn }
+    if (((get-Process | select-Object  mainWindowTitle | select-String "ssout") -match "Login")) { attemptIn }
     sendKey 0x24
     waitFor 5
     goAndClick 950 220
@@ -226,7 +224,7 @@ function replaceUnicodes($uni) {
 }
 
 function attemptIn {
-    goAndClick 960 295
+    tabChoose 2
     waitFor 1
     sendKey 0x43
     sendKey 0x4F
@@ -288,7 +286,6 @@ function p {
             break
         }
         goAndClick 170 690
-        #goAndClick 960 700
         tabChoose 1
         waitFor 1
         set-Clipboard "$path\c$l.png"
@@ -313,20 +310,20 @@ function clear-Clip {
     sendKey lwin+d
     sendKey lwin+v
     waitFor 2
-    goAndClick 1860 710
+    tabChoose 2
     sendKey esc
 }
 
 #macros
 
 function ggpq($c) {
-    gen(grab -c $c -nr -na)
+    gen(grab -c $c -nr)
     p -all
     clear-Clip
 }
 
 function ggpqim($c) {
-    gen(grab -c $c -nr -na) -im
+    gen(grab -c $c -nr) -im
     p -all
     clear-Clip
 }
