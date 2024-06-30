@@ -41,12 +41,15 @@ function gen {
     }
 
     if (!($im)) {
-        for ($t = 5; $t -gt 1; $t--) {
-            write-Progress -activity " starting" -status "in:" -secondsRemaining $t
+        write-Host "starting in:`n" -foregroundColor yellow
+        for ($t = 5; $t -ge 1; $t--) {
+            write-Host "$t" -foregroundColor yellow -noNewline
+            for ($i = 0; $i -lt $t; $i++) { write-Host "." -foregroundColor yellow -noNewline }
+            write-Host ""
             start-Sleep 1
         }
     }
-    
+
     if (!($im)) {
         nircmd.exe win max ititle "$title"
         nircmd.exe win settopmost ititle "$title" 1
@@ -85,7 +88,11 @@ function gen {
             set-Clipboard "$output"
             write-Host "starting c$($i):" -foregroundColor yellow
             write-Host "$output`n" -foregroundColor blue
-            if (!(get-Process "Photoshop" -eA 0)) { break }
+            if ((get-Process | select-Object  mainWindowTitle | select-String "template.psd") -notmatch "template.psd") {
+                write-Error "photoshop document not found!"
+                break
+            }
+            #if (!(get-Process "Photoshop" -eA 0)) { break }
             goAndClick 960 540
             sendKey alt+0xBE
             sendKey ctrl+enter
@@ -117,6 +124,8 @@ function gen {
     }
     if (!($im)) {
         waitFor 1
+        sendKey ctrl+s
+        waitFor 1
         nircmd.exe win settopmost ititle "$title" 0
         nircmd.exe win min ititle "$title"
     }
@@ -139,6 +148,14 @@ function goAndClick($x, $y) {
     waitFor 3
 }
 
+function tabChoose($e) {
+    waitFor 2
+    for ($o = 0; $o -lt $e; $o++) {
+        sendKey 0x09
+    }
+    sendKey enter
+}
+
 function grab {
     param (
         [int32]
@@ -152,7 +169,8 @@ function grab {
     )
 
     $result = ""
-
+    nircmd.exe win min ititle "ssout"
+    waitFor 1
     nircmd.exe win max ititle "ssout"
     waitFor 1
     if ((get-Process | select-Object  mainWindowTitle | select-String "ssout") -notmatch "ssout") {
@@ -166,7 +184,7 @@ function grab {
         waitFor 7
     }
     if (!($na)) { attemptIn }
-
+    sendKey 0x24
     waitFor 5
     goAndClick 950 220
     waitFor 2
@@ -176,8 +194,15 @@ function grab {
     waitFor 5
     goAndClick 950 220
     get-Clipboard | select-String "-.+\d\d:\d\d:\d\d$" -context 1 | forEach-Object {
-        $add = $_.context.postContext 
-        if ($add -notin $list) { $list += $_.context.postContext }
+        $add = $_.context.postContext
+        $mal = 0
+        for ($m = 0; $m -lt $add.length; $m++) {
+            if ($add[$m] -match "[\u0D00-\u0D7F]+") {
+                $mal = 1
+                break
+            }
+        }
+        if (($add -notin $list) -and ($mal -eq 0)) { $list += $_.context.postContext }
     }
     $j = 1
     $list -split "`n" | forEach-Object {
@@ -252,27 +277,29 @@ function p {
     waitFor 2
     goAndClick 175 750
     waitFor 4
-    if ((get-Process | select-Object  mainWindowTitle | select-String "Instagram") -notmatch ".+c.+k.c.+") {
-        write-Error "tab/process/account not found!"
-        break
-    }
+
     if ($all) {
         $c = 0
         get-ChildItem $path -filter c*.png | forEach-Object { $c++ }
     }
     for ($l = $c; $l -gt 0; $l--) {
+        if ((get-Process | select-Object  mainWindowTitle | select-String "Instagram") -notmatch ".+c.k.+c.+s.+") {
+            write-Error "tab/process/account not found!"
+            break
+        }
         goAndClick 170 690
-        goAndClick 960 700
+        #goAndClick 960 700
+        tabChoose 1
         waitFor 1
         set-Clipboard "$path\c$l.png"
         sendKey ctrl+v
         sendKey enter
         waitFor 2
-        goAndClick 1260 245
-        goAndClick 1470 245
-        goAndClick 1470 245
+        tabChoose 2
+        tabChoose 2
+        tabChoose 2
         waitFor 7
-        goAndClick 1865 145
+        tabChoose 1
         write-Host "`nposted c$($l)!" -foregroundColor green
         waitFor 3
     }
@@ -320,12 +347,13 @@ function ggpio($n) {
     $l = $n[-1]
     for ($i = 1; $i -le $l; $i++) {
         if ("$n" -notmatch "$i") {
-            $s += "$i,"
+            $s += "$i, "
         }
     }
-    $s = $s -replace ",$",""
+    $s = $s -replace ", $",""
+    $s = $s -replace "^$","0"
     $c = $l
-    write-Host "excluded $s." -foregroundColor blue
+    write-Host "`nexcluded $s." -foregroundColor blue
     
     gen(grab -c $c -skip "$s")
     p -all
