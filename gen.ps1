@@ -1,5 +1,24 @@
 $path = "$env:userProfile\Documents\Adobe\psd"
 
+#import user32 for currentTitle
+
+add-Type @"
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+
+public class User32 {
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    public static extern int GetWindowTextLength(IntPtr hWnd);
+}
+"@
+
 function gen {
     param (
         [string]
@@ -88,7 +107,7 @@ function gen {
             set-Clipboard "$output"
             write-Host "starting c$($i):" -foregroundColor yellow
             write-Host "$output`n" -foregroundColor blue
-            if ((get-Process | select-Object  mainWindowTitle | select-String "template.psd") -notmatch "template.psd") {
+            if ($(currentTitle) -notmatch "template.psd") {
                 write-Error "photoshop document not found!"
                 break
             }
@@ -96,6 +115,7 @@ function gen {
             goAndClick 960 540
             sendKey alt+0xBE
             sendKey ctrl+enter
+            waitFor 1
             sendKey ctrl+v
             waitFor 1
             sendKey esc
@@ -130,7 +150,8 @@ function gen {
         nircmd.exe win min ititle "$title"
     }
     waitFor 1
-    write-Host "completed all $($i-1) tasks!" -foregroundColor red
+    if ($($i-1) -eq 1) { write-Host "completed 1 task!" -foregroundColor red }
+    else { write-Host "completed all $($i-1) tasks!" -foregroundColor red }
 }
 
 function sendKey($k) {
@@ -156,6 +177,16 @@ function tabChoose($e) {
     sendKey enter
 }
 
+function currentTitle {
+    waitFor 1
+    $hWnd = [user32]::getForegroundWindow()
+    $length = [User32]::GetWindowTextLength($hWnd)
+    $sb = New-Object System.Text.StringBuilder -ArgumentList ($length + 1)
+    [User32]::GetWindowText($hWnd, $sb, $sb.Capacity) | Out-Null
+    if (($hWnd -eq [IntPtr]::Zero) -or ($length -le 0)) { return $null }
+    else { return $sb.ToString() }
+}
+
 function grab {
     param (
         [int32]
@@ -170,8 +201,8 @@ function grab {
     nircmd.exe win min ititle "ssout"
     waitFor 1
     nircmd.exe win max ititle "ssout"
-    waitFor 1
-    if ((get-Process | select-Object  mainWindowTitle | select-String "ssout") -notmatch "ssout") {
+    waitFor 2
+    if ($(currentTitle) -notmatch "ssout") {
         write-Error "tab/process not found!"
         break
     }
@@ -181,15 +212,14 @@ function grab {
         sendKey 0x11+0x74
         waitFor 7
     }
-    if (((get-Process | select-Object  mainWindowTitle | select-String "ssout") -match "Login")) { attemptIn }
-    sendKey 0x24
-    waitFor 5
+    if ($(currentTitle) -match "Login") { attemptIn }
+    waitFor 2
     goAndClick 950 220
     waitFor 2
     sendKey ctrl+a
-    waitFor 5
+    waitFor 3
     sendKey ctrl+c
-    waitFor 5
+    waitFor 3
     goAndClick 950 220
     get-Clipboard | select-String "-.+\d\d:\d\d:\d\d$" -context 1 | forEach-Object {
         $add = $_.context.postContext
@@ -233,6 +263,7 @@ function attemptIn {
     set-Clipboard (get-Content "$path\idp.env" -tail 1)
     sendKey ctrl+v
     sendKey enter
+    sendKey 0x24
     waitFor 5
 }
 
@@ -254,7 +285,7 @@ function p {
         get-ChildItem $path -filter c*.png | forEach-Object { $c++ }
     }
     for ($l = $c; $l -gt 0; $l--) {
-        if ((get-Process | select-Object  mainWindowTitle | select-String "Instagram") -notmatch ".+c.k.+c.+s.+") {
+        if ($(currentTitle) -notmatch ".+c.k.+c.+s.+") {
             write-Error "tab/process/account not found!"
             break
         }
