@@ -72,7 +72,11 @@ function gen {
     if (!($im)) {
         nircmd.exe win max ititle "$title"
         nircmd.exe win settopmost ititle "$title" 1
-        waitFor 1
+        waitFor 2
+        if ($(currentTitle) -notmatch "template.psd") {
+            write-Error "photoshop document not found!"
+            break
+        }
     }
 
     $i = $start
@@ -107,11 +111,6 @@ function gen {
             set-Clipboard "$output"
             write-Host "starting c$($i):" -foregroundColor yellow
             write-Host "$output`n" -foregroundColor blue
-            if ($(currentTitle) -notmatch "template.psd") {
-                write-Error "photoshop document not found!"
-                break
-            }
-            #if (!(get-Process "Photoshop" -eA 0)) { break }
             goAndClick 960 540
             sendKey alt+0xBE
             sendKey ctrl+enter
@@ -129,6 +128,7 @@ function gen {
             #export as png
             waitFor 1
             set-Clipboard "c$i"
+            while ($(currentTitle) -notmatch "Save As") { waitFor 1 }
             if ($i -eq 1) { waitFor 3 }
             else { waitFor 3 }
             sendKey ctrl+v
@@ -200,8 +200,9 @@ function grab {
     $result = ""
     nircmd.exe win min ititle "ssout"
     waitFor 1
+    nircmd.exe win activate ititle "ssout"
     nircmd.exe win max ititle "ssout"
-    waitFor 2
+    waitFor 1
     if ($(currentTitle) -notmatch "ssout") {
         write-Error "tab/process not found!"
         break
@@ -213,11 +214,11 @@ function grab {
         waitFor 7
     }
     if ($(currentTitle) -match "Login") { attemptIn }
-    waitFor 2
+    waitFor 1
     goAndClick 950 220
     waitFor 2
     sendKey ctrl+a
-    waitFor 3
+    waitFor 2
     sendKey ctrl+c
     waitFor 3
     goAndClick 950 220
@@ -275,6 +276,7 @@ function p {
         $all
     )
     waitFor 2
+    nircmd.exe win activate ititle "Instagram"
     nircmd.exe win max ititle "Instagram"
     waitFor 2
     goAndClick 175 750
@@ -296,7 +298,7 @@ function p {
         sendKey ctrl+v
         sendKey enter
         waitFor 2
-        tabChoose 2
+        tabChoose 1
         tabChoose 2
         tabChoose 2
         waitFor 7
@@ -359,4 +361,9 @@ function ggpio($n) {
     gen(grab -c $c -skip "$s")
     p -all
     clear-Clip
+}
+
+function inP($arg) {
+    . $profile
+    invoke-Expression "$arg"
 }
