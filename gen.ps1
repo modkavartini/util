@@ -293,12 +293,13 @@ function p {
         }
         goAndClick 170 690
         tabChoose 1
-        waitFor 1
+        waitFor 2
         set-Clipboard "$path\c$l.png"
+        waitFor 1
         sendKey ctrl+v
         sendKey enter
         waitFor 2
-        tabChoose 1
+        tabChoose 2
         tabChoose 2
         tabChoose 2
         waitFor 7
