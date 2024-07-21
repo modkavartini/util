@@ -14,5 +14,5 @@ to learn it's functions.
 
 you can also do `clone -repo modkavartini/util` to clone this repo.
 
-## make.ps1 
+## gen.ps1 
 😉
