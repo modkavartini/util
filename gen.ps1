@@ -136,7 +136,7 @@ function gen {
         }
 
         else {
-            convert "$path\template.png" -gravity center -font "$path\font.otf" -fill "#e1e7fa" -pointsize 37 -annotate 0 "$output" "$path\c$($start).png"
+            convert "$path\template.png" -gravity center -font "$path\font.otf" -fill "#d2b782" -pointsize 37 -annotate 0 "$output" "$path\c$($start).png"
         }
 
         write-Host "completed c$($i)!`n" -foregroundColor green
@@ -299,7 +299,7 @@ function p {
         sendKey ctrl+v
         sendKey enter
         waitFor 2
-        tabChoose 2
+        tabChoose 1
         tabChoose 2
         tabChoose 2
         waitFor 7
